@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,24 +38,33 @@ private fun MyApp(
 
 @Composable
 fun Greeting(name: String) {
+    val expanded = remember { mutableStateOf(false) }
+
+    val extraPadding = if (expanded.value) 48.dp else 0.dp
+
     Surface(
         color = MaterialTheme.colors.primary,
         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
         Row(modifier = Modifier.padding(24.dp)) {
             Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)) {
+                .weight(1f)
+                .padding(bottom = extraPadding)
+            ) {
                 Text(text = "Hello,")
                 Text(text = name)
             }
-            ShowMoreButton()
+            Button(
+                onClick = { expanded.value = !expanded.value },
+            ) {
+                Text(if (expanded.value) "Show less" else "Show more")
+            }
         }
     }
 }
 
 @Composable
-fun ShowMoreButton() {
+fun ShowButton() {
     Button(
         onClick = { /* TODO */ }
     ) {
