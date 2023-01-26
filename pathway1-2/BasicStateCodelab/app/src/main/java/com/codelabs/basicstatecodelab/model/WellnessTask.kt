@@ -1,10 +1,13 @@
 package com.codelabs.basicstatecodelab.model
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 data class WellnessTask(
     val id: Int,
-    val label: String
+    val label: String,
+    val initialChecked: Boolean = false
 ) {
-    companion object {
-        fun getWellnessTasks() = List(30) { i -> WellnessTask(i, "Task # $i") }
-    }
+    var checked by mutableStateOf(initialChecked)
 }
