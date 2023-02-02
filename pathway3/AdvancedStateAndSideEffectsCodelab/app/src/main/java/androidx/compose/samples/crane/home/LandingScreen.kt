@@ -35,15 +35,17 @@ private const val SplashWaitTime: Long = 2000
 fun LandingScreen(modifier: Modifier = Modifier, onTimeout: () -> Unit) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
-        // LaunchedEffect가 컴포지션을 시작하면 코루틴 실행
-        // LaunchedEffect가 컴포지션을 종료하면 코루틴 취소
-
         // key1 key2 ... -> key중 하나가 변경될때마다 효과 다시 시작
+        // MainScreen -> onTimeout은 showLandingScreen state 변수를 조작 -> 첫 접속 후에는 false로 바꿀텐데,,
+        // 앱 나갔다 들어오면 다시 true로 변경 -> 스플래시 다시 시작??
         // onTimeout이 변경되더라도 LandingScreen이 나타나서는 안된다!
 
+        // LandingScreen(onTimeout = { showLandingScreen = false })
         // onTimeout이 변경될 때 값을 업데이트 -> 가장 마지막 값만 변경할 수 있는 rememberUpdatedState
         val currentOnTimeout by rememberUpdatedState(onTimeout)
 
+        // 외부에서 rememberCoroutineScope를 만들고 scope.launch로 처리할 수 있지 않을까?
+        // MainScreen -> Landing Screen을 호출할 때마다 코루틴 실행 -> 리소스 낭비
         LaunchedEffect(onTimeout) {
             delay(SplashWaitTime)
             currentOnTimeout()

@@ -16,6 +16,7 @@
 
 package androidx.compose.samples.crane.home
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
@@ -33,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.insets.statusBarsPadding
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 typealias OnExploreItemClicked = (ExploreModel) -> Unit
 
@@ -53,12 +56,23 @@ fun CraneHome(
             CraneDrawer()
         }
     ) { padding ->
+
+        // Composable에서 Coroutine을 생성하면 -> 대부분 recomposition시 사라질텐데
+        // Composable의 lifecycle을 따르는 rememberCoroutineScope
+        // composition을 종료하면 자동으로 취소되는 scope
+
+        // 매개변수가 변경될 때 마다 취소하고 다시 시작 -> LaunchedEffect
+        // 코루틴을 사용중이고 이벤트 발생 시 코루틴을 취소하고 다시 시작 -> rememberCoroutineScope
+        val scope = rememberCoroutineScope()
+
         CraneHomeContent(
             modifier = modifier.padding(padding),
             onExploreItemClicked = onExploreItemClicked,
             openDrawer = {
-                // TODO Codelab: rememberCoroutineScope step - open the navigation drawer
-                // scaffoldState.drawerState.open()
+                // scaffoldState.drawerState.open()은 코루틴 내에서 실행되어야 한다. (suspend fun)
+                scope.launch {
+                    scaffoldState.drawerState.open()
+                }
             }
         )
     }
