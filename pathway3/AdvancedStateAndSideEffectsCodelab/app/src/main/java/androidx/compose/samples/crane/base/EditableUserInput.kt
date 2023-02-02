@@ -57,7 +57,7 @@ fun CraneEditableUserInput(
     }
 }
 
-// Composable은 일반 class를 상속 가능?
+// Composable 함수는 값을 반환 가능?
 // EditableUserInputState에서 기억된 상태가 프로세스 및 액티비티 재생성시에도 유지
 @Composable
 fun rememberEditableUserInputState(hint: String): EditableUserInputState =
