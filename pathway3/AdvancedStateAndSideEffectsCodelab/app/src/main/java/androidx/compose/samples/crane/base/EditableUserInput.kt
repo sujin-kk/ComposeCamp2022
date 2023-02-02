@@ -24,39 +24,70 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.samples.crane.ui.captionTextStyle
 import androidx.compose.ui.graphics.SolidColor
 
 @Composable
 fun CraneEditableUserInput(
-    hint: String,
+    state: EditableUserInputState = rememberEditableUserInputState(""),
     caption: String? = null,
     @DrawableRes vectorImageId: Int? = null,
-    onInputChanged: (String) -> Unit
 ) {
-    // TODO Codelab: Encapsulate this state in a state holder
-    var textState by remember { mutableStateOf(hint) }
-    val isHint = { textState == hint }
-
+    // state의 캡슐화
     CraneBaseUserInput(
         caption = caption,
-        tintIcon = { !isHint() },
-        showCaption = { !isHint() },
+        tintIcon = { !state.isHint },
+        showCaption = { !state.isHint },
         vectorImageId = vectorImageId
     ) {
         BasicTextField(
-            value = textState,
-            onValueChange = {
-                textState = it
-                if (!isHint()) onInputChanged(textState)
-            },
-            textStyle = if (isHint()) {
+            value = state.text,
+            onValueChange = { state.text = it },
+            textStyle = if (state.isHint) {
                 captionTextStyle.copy(color = LocalContentColor.current)
             } else {
                 MaterialTheme.typography.body1.copy(color = LocalContentColor.current)
             },
             cursorBrush = SolidColor(LocalContentColor.current)
+        )
+    }
+}
+
+// Composable은 일반 class를 상속 가능?
+// EditableUserInputState에서 기억된 상태가 프로세스 및 액티비티 재생성시에도 유지
+@Composable
+fun rememberEditableUserInputState(hint: String): EditableUserInputState =
+    rememberSaveable(hint, saver = EditableUserInputState.Saver) {
+        EditableUserInputState(hint, hint)
+    }
+
+// EditText의 입력 로직이 더 복잡해지더라도 해당 클래스만 변경하면 되도독 refactoring
+class EditableUserInputState(private val hint: String, initialText: String) {
+
+    // class 외부에서 직접 변형 가능
+    var text by mutableStateOf(initialText)
+
+    val isHint: Boolean
+        get() = text == hint
+
+    companion object {
+
+        // Saver -> 객체를 Saveable 상태로 변환
+        // listSaver, mapSaver 등의 API 적극 활용
+        // save : 원래 값을 저장 가능한 값으로 변환
+        // restore : 복원된 값을 원본 클래스의 인스턴스로 변환
+        val Saver: Saver<EditableUserInputState, *> = listSaver(
+            save = { listOf(it.hint, it.text) },
+            restore = {
+                EditableUserInputState(
+                    hint = it[0],
+                    initialText = it[1]
+                )
+            }
         )
     }
 }
