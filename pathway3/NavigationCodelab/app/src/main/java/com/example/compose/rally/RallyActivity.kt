@@ -82,55 +82,66 @@ fun RallyApp() {
                 )
             }
         ) { innerPadding ->
-            NavHost(
+            RallyNavHost(
                 navController = navController,
-                startDestination = Overview.route,
                 modifier = Modifier.padding(innerPadding)
-            ) {
-                // builder -> navGraph 정의 및 빌드
-                composable(route = Overview.route) {
-                    // 이동하면 표시 할 UI
-                    // 화면의 클릭 이벤트를 콜러에서 전달해주는게 맞나? 화면 컴포저블 내부적으로 처리하는게 더 낫지않나,,
-                    // navController를 참조하기 위함인것같다?!
-                    // navController를 넘기는게 나을지 고민해봐야함
-                    OverviewScreen(
-                        onClickSeeAllAccounts = {
-                            navController.navigateSingleTopTo(Accounts.route)
-                        },
-                        onClickSeeAllBills = {
-                            navController.navigateSingleTopTo(Bills.route)
-                        },
-                        onAccountClick = { accountType ->
-                            navController.navigateToSingleAccount(accountType)
-                        }
-                    )
-                }
+            )
+        }
+    }
+}
 
-                composable(route = Accounts.route) {
-                    AccountsScreen(
-                        onAccountClick = { accountType ->
-                            navController.navigateToSingleAccount(accountType)
-                        }
-                    )
+@Composable
+fun RallyNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Overview.route,
+        modifier = modifier
+    ) {
+        // builder -> navGraph 정의 및 빌드
+        composable(route = Overview.route) {
+            // 이동하면 표시 할 UI
+            // 화면의 클릭 이벤트를 콜러에서 전달해주는게 맞나? 화면 컴포저블 내부적으로 처리하는게 더 낫지않나,,
+            // navController를 참조하기 위함인것같다?!
+            // navController를 넘기는게 나을지 고민해봐야함
+            OverviewScreen(
+                onClickSeeAllAccounts = {
+                    navController.navigateSingleTopTo(Accounts.route)
+                },
+                onClickSeeAllBills = {
+                    navController.navigateSingleTopTo(Bills.route)
+                },
+                onAccountClick = { accountType ->
+                    navController.navigateToSingleAccount(accountType)
                 }
+            )
+        }
 
-                composable(route = Bills.route) {
-                    BillsScreen()
+        composable(route = Accounts.route) {
+            AccountsScreen(
+                onAccountClick = { accountType ->
+                    navController.navigateToSingleAccount(accountType)
                 }
+            )
+        }
 
-                // argument와 함께 라우팅
-                // "route/{argument}" 패턴
-                composable(
-                    route = SingleAccount.routeWithArgs,
-                    arguments = SingleAccount.arguments,
-                    deepLinks = SingleAccount.deepLinks
-                ) { navBackStackEntry ->
-                    val accountType =
-                        navBackStackEntry.arguments?.getString(SingleAccount.accountTypeArg)
+        composable(route = Bills.route) {
+            BillsScreen()
+        }
 
-                    SingleAccountScreen(accountType)
-                }
-            }
+        // argument와 함께 라우팅
+        // "route/{argument}" 패턴
+        composable(
+            route = SingleAccount.routeWithArgs,
+            arguments = SingleAccount.arguments,
+            deepLinks = SingleAccount.deepLinks
+        ) { navBackStackEntry ->
+            val accountType =
+                navBackStackEntry.arguments?.getString(SingleAccount.accountTypeArg)
+
+            SingleAccountScreen(accountType)
         }
     }
 }
