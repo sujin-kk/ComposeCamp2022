@@ -35,7 +35,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.rally.ui.accounts.AccountsScreen
+import com.example.compose.rally.ui.bills.BillsScreen
 import com.example.compose.rally.ui.components.RallyTabRow
+import com.example.compose.rally.ui.overview.OverviewScreen
 import com.example.compose.rally.ui.theme.RallyTheme
 
 /**
@@ -83,15 +86,25 @@ fun RallyApp() {
             ) {
                 // builder -> navGraph 정의 및 빌드
                 composable(route = Overview.route) {
-                    Overview.screen // 이동하면 표시 할 UI
+                    // 이동하면 표시 할 UI
+                    // 화면의 클릭 이벤트를 콜러에서 전달해주는게 맞나? 화면 컴포저블 내부적으로 처리하는게 더 낫지않나,,
+                    // navController를 참조하기 위함인것같다?!
+                    OverviewScreen(
+                        onClickSeeAllAccounts = {
+                            navController.navigateSingleTopTo(Accounts.route)
+                        },
+                        onClickSeeAllBills = {
+                            navController.navigateSingleTopTo(Bills.route)
+                        }
+                    )
                 }
 
                 composable(route = Accounts.route) {
-                    Accounts.screen
+                    AccountsScreen()
                 }
 
                 composable(route = Bills.route) {
-                    Accounts.screen
+                    BillsScreen()
                 }
             }
         }
