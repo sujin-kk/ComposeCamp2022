@@ -28,8 +28,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.rally.ui.components.RallyTabRow
 import com.example.compose.rally.ui.theme.RallyTheme
@@ -50,15 +54,24 @@ class RallyActivity : ComponentActivity() {
 @Composable
 fun RallyApp() {
     RallyTheme {
-        var currentScreen: RallyDestination by remember { mutableStateOf(Overview) }
         // navController는 컴포저블 계층 구조의 최상위 수준 (일반적으로 App Composable 내)에서 만들어야 함
-        // 상태 호이스팅 원칙 준수
         val navController = rememberNavController()
+
+        // 반환된 destination을 우리 composable로 매칭할 방법을 찾아야 함
+        // 화면에 어느 composable이 표시되어 있는지 확인하여 정보를 Tab에 전달한다.
+        // 문자열 경로를 id로 사용하여 비교
+        val currentBackStack by navController.currentBackStackEntryAsState()
+        val currentDestination = currentBackStack?.destination
+        val currentScreen = rallyTabRowScreens.find { it.route == currentDestination?.route } ?: Overview
+
+        // 탭을 탭하면 특정 대상으로 이동 -> 올바른 대상으로 이동하도록 navGraph에 연결
         Scaffold(
             topBar = {
                 RallyTabRow(
                     allScreens = rallyTabRowScreens,
-                    onTabSelected = { screen -> currentScreen = screen },
+                    onTabSelected = { screen ->
+                        navController.navigateSingleTopTo(screen.route)
+                    },
                     currentScreen = currentScreen
                 )
             }
@@ -84,3 +97,20 @@ fun RallyApp() {
         }
     }
 }
+
+/**
+ * 백스택에 화면 인스턴스가 최대 1개만 있도록 -> 계속 인스턴스 생성 방지
+ * launchSingleTop 플래그 준다.
+ * popUpTo(startDestination) { saveState = true } -> 탭을 선택했을 때 백스택에 대규모 대상 스택이 빌드되지 않는다.
+ * restoreState = true -> 이 탐색 동작이 이전에 popUpToSaveState에 의해 저장된 상태를 복원하는지 여부 정한다.
+ * **/
+fun NavHostController.navigateSingleTopTo(route: String) =
+    this.navigate(route) {
+        popUpTo(
+            this@navigateSingleTopTo.graph.findStartDestination().id
+        ) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
