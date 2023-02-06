@@ -36,6 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.rally.ui.accounts.AccountsScreen
+import com.example.compose.rally.ui.accounts.SingleAccountScreen
 import com.example.compose.rally.ui.bills.BillsScreen
 import com.example.compose.rally.ui.components.RallyTabRow
 import com.example.compose.rally.ui.overview.OverviewScreen
@@ -65,7 +66,8 @@ fun RallyApp() {
         // 문자열 경로를 id로 사용하여 비교
         val currentBackStack by navController.currentBackStackEntryAsState()
         val currentDestination = currentBackStack?.destination
-        val currentScreen = rallyTabRowScreens.find { it.route == currentDestination?.route } ?: Overview
+        val currentScreen =
+            rallyTabRowScreens.find { it.route == currentDestination?.route } ?: Overview
 
         // 탭을 탭하면 특정 대상으로 이동 -> 올바른 대상으로 이동하도록 navGraph에 연결
         Scaffold(
@@ -89,22 +91,42 @@ fun RallyApp() {
                     // 이동하면 표시 할 UI
                     // 화면의 클릭 이벤트를 콜러에서 전달해주는게 맞나? 화면 컴포저블 내부적으로 처리하는게 더 낫지않나,,
                     // navController를 참조하기 위함인것같다?!
+                    // navController를 넘기는게 나을지 고민해봐야함
                     OverviewScreen(
                         onClickSeeAllAccounts = {
                             navController.navigateSingleTopTo(Accounts.route)
                         },
                         onClickSeeAllBills = {
                             navController.navigateSingleTopTo(Bills.route)
+                        },
+                        onAccountClick = { accountType ->
+                            navController.navigateToSingleAccount(accountType)
                         }
                     )
                 }
 
                 composable(route = Accounts.route) {
-                    AccountsScreen()
+                    AccountsScreen(
+                        onAccountClick = { accountType ->
+                            navController.navigateToSingleAccount(accountType)
+                        }
+                    )
                 }
 
                 composable(route = Bills.route) {
                     BillsScreen()
+                }
+
+                // argument와 함께 라우팅
+                // "route/{argument}" 패턴
+                composable(
+                    route = SingleAccount.routeWithArgs,
+                    arguments = SingleAccount.arguments
+                ) { navBackStackEntry ->
+                    val accountType =
+                        navBackStackEntry.arguments?.getString(SingleAccount.accountTypeArg)
+
+                    SingleAccountScreen(accountType)
                 }
             }
         }
@@ -127,3 +149,6 @@ fun NavHostController.navigateSingleTopTo(route: String) =
         launchSingleTop = true
         restoreState = true
     }
+
+fun NavHostController.navigateToSingleAccount(accountType: String) =
+    this.navigateSingleTopTo("${SingleAccount.route}/$accountType")
