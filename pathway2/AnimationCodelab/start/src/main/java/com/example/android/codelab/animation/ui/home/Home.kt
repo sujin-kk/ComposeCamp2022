@@ -576,7 +576,7 @@ private fun WeatherRow(
 private fun LoadingRow() {
     // TODO 5: Animate this value between 0f and 1f, then back to 0f repeatedly.
     // 0과 1f 사이에서 반복적으로 애니메이션 처리
-    // default: Restart, initial -> target 후 initial -> target
+    // Restart, initial -> target 후 initial -> target
     // Reverse, initial -> target -> initial -> target
     val infiniteTransition = rememberInfiniteTransition()
     val alpha by infiniteTransition.animateFloat(
@@ -701,6 +701,7 @@ private fun Modifier.swipeToDismiss(
                     // TODO 6-6: Slide back the element if the settling position does not go beyond
                     //           the size of the element. Remove the element if it does.
                     if (targetOffsetX.absoluteValue <= size.width) {
+                        // 적게 슬라이드하면 다시 원래 포지션(0)으로 돌아감
                         offsetX.animateTo(targetValue = 0f, initialVelocity = velocity)
                     }
                     else {
