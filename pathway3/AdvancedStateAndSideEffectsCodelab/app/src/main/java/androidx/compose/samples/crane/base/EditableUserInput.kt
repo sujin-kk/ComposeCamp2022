@@ -61,7 +61,7 @@ fun CraneEditableUserInput(
 @Composable
 fun rememberEditableUserInputState(hint: String): EditableUserInputState =
     rememberSaveable(hint, saver = EditableUserInputState.Saver) {
-        EditableUserInputState(hint, hint)
+        EditableUserInputState(hint, initialText = hint)
     }
 
 // EditText의 입력 로직이 더 복잡해지더라도 해당 클래스만 변경하면 되도독 refactoring

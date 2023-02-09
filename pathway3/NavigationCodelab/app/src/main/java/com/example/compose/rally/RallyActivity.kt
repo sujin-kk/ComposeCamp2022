@@ -109,12 +109,16 @@ fun RallyNavHost(
             OverviewScreen(
                 onClickSeeAllAccounts = {
                     navController.navigateSingleTopTo(Accounts.route)
+//                    navController.navigate(Accounts.route) {
+//                        popUpTo(Bills.route)
+//                    }
                 },
                 onClickSeeAllBills = {
                     navController.navigateSingleTopTo(Bills.route)
                 },
                 onAccountClick = { accountType ->
                     navController.navigateToSingleAccount(accountType)
+
                 }
             )
         }
