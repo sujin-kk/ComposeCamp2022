@@ -17,9 +17,7 @@
 package com.example.android.codelab.animation.ui.home
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -275,7 +273,7 @@ private fun HomeFloatingActionButton(
             // Toggle the visibility of the content with animation.
             // TODO 2-1: Animate this visibility change.
             // AnimatedVisibility -> 저장 된 boolean값 변경될때마다 애니메이션 실행
-            AnimatedVisibility (extended) {
+            AnimatedVisibility(extended) {
                 Text(
                     text = stringResource(R.string.edit),
                     modifier = Modifier
@@ -297,7 +295,10 @@ private fun EditMessage(shown: Boolean) {
         visible = shown,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> -fullHeight }, // 위에서 슬라이드 인
-            animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing) // 시간이 지남에 따라 애니메이션 값을 어떻게 변경할 지
+            animationSpec = tween(
+                durationMillis = 150,
+                easing = LinearOutSlowInEasing
+            ) // 시간이 지남에 따라 애니메이션 값을 어떻게 변경할 지
         ),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> -fullHeight }, // 위로 슬라이드 아웃
@@ -456,9 +457,37 @@ private fun HomeTabIndicator(
     tabPage: TabPage
 ) {
     // TODO 4: Animate these value changes.
-    val indicatorLeft = tabPositions[tabPage.ordinal].left
-    val indicatorRight = tabPositions[tabPage.ordinal].right
-    val color = if (tabPage == TabPage.Home) Purple700 else Green800
+    val transition = updateTransition(targetState = tabPage, label = "Tab indicator")
+    val indicatorLeft by transition.animateDp(
+        transitionSpec = {
+            if (TabPage.Home isTransitioningTo TabPage.Work) {
+                spring(stiffness = Spring.StiffnessLow)
+            } else {
+                spring(stiffness = Spring.StiffnessMedium)
+            }
+        },
+        label = "Indicator left"
+    ) { page ->
+        tabPositions[page.ordinal].left
+    }
+    val indicatorRight by transition.animateDp(
+        transitionSpec = {
+            if (TabPage.Home isTransitioningTo TabPage.Work) {
+                spring(stiffness = Spring.StiffnessLow)
+            } else {
+                spring(stiffness = Spring.StiffnessVeryLow)
+            }
+        },
+        label = "Indicator right"
+    ) { page ->
+        tabPositions[page.ordinal].right
+    }
+    val color by transition.animateColor(
+        label = "Border color"
+    ) { page ->
+        if (page == TabPage.Home) Purple700 else Green800
+    }
+
     Box(
         Modifier
             .fillMaxSize()
