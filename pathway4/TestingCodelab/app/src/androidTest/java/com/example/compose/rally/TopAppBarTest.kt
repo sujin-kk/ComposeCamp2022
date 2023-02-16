@@ -1,5 +1,7 @@
 package com.example.compose.rally
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.example.compose.rally.ui.components.RallyTopAppBar
@@ -29,7 +31,7 @@ class TopAppBarTest {
             )
         }
 
-        // 현재 Accounts 화면이 select 됐는지
+        //  Accounts 화면이 select 됐는지
         composeTestRule
             .onNodeWithContentDescription(RallyScreen.Accounts.name)
             .assertIsSelected()
@@ -60,9 +62,24 @@ class TopAppBarTest {
                 ),
                 useUnmergedTree = true
             )
+            .assertExists()
+    }
 
-//        composeTestRule
-//            .onNodeWithContentDescription(RallyScreen.Accounts.name)
-//            .assertExists()
+    // 다른 탭을 클릭하면 컴포저블이 잘 변경 되는지
+    @Test
+    fun rallyTopAppBarTest_currentScreenChangedWhenTabSelected() {
+        val currentScreen by mutableStateOf(RallyScreen.Overview)
+
+        composeTestRule.setContent {
+            RallyTopAppBar(
+                allScreens = allScreens,
+                onTabSelected = { },
+                currentScreen = currentScreen
+            )
+        }
+
+        composeTestRule.onNode(
+            hasClickAction(),
+        ).performClick()
     }
 }
